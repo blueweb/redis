@@ -20,18 +20,25 @@
 					<th>Name:</th>
 					<td><?= $connection['name'] ?></td>
 				</tr>
-				<tr>
-					<th>Ping:</th>
-					<td><?= $connection['ping'] ?> (<?= number_format($connection['duration'], 4) ?> ms)</td>
-				</tr>
-				<tr>
-					<th>DB size:</th>
-					<td><?= $connection['dbSize'] ?> keys</td>
-				</tr>
-				<tr>
-					<th>Server:</th>
-					<td><code><?= $connection['uri'] ?></code></td>
-				</tr>
+				<?php if (is_array($connection['uri'])): ?>
+					<tr>
+						<th>Cluster nodes:</th>
+						<td><?php foreach ($connection['uri'] as $uri): ?><code><?= $uri ?></code><br><?php endforeach; ?></td>
+					</tr>
+				<?php else: ?>
+					<tr>
+						<th>Server:</th>
+						<td><code><?= $connection['uri'] ?></code></td>
+					</tr>
+					<tr>
+						<th>Ping:</th>
+						<td><?= $connection['ping'] ?> (<?= number_format($connection['duration'], 4) ?> ms)</td>
+					</tr>
+					<tr>
+						<th>DB size:</th>
+						<td><?= $connection['dbSize'] ?> keys</td>
+					</tr>
+				<?php endif; ?>
 				<tr>
 					<th>Connection options:</th>
 					<td><?php dump($connection['options']); ?></td>

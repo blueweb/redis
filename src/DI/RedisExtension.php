@@ -28,7 +28,10 @@ final class RedisExtension extends CompilerExtension
 		return Expect::structure([
 			'debug' => Expect::bool(false),
 			'connection' => Expect::arrayOf(Expect::structure([
-				'uri' => Expect::string('tcp://127.0.0.1:6379'),
+				'uri' => Expect::anyOf(
+					Expect::string(),
+					Expect::arrayOf(Expect::string())
+				)->default('tcp://127.0.0.1:6379'),
 				'options' => Expect::array(),
 				'storage' => Expect::bool(false),
 				'sessions' => Expect::anyOf(
@@ -47,6 +50,19 @@ final class RedisExtension extends CompilerExtension
 		$connections = [];
 
 		foreach ($config->connection as $name => $connection) {
+			$clusterMode = false;
+			if (is_array($connection->uri)) {
+				if (count($connection->uri) < 2) {
+					$connection->uri = reset($connection->uri);
+				} else {
+					$clusterMode = true;
+				}
+			}
+
+			if ($clusterMode && !isset($connection->options['cluster'])) {
+				$connection->options['cluster'] = 'redis';
+			}
+
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(Client::class)
 				->setArguments([$connection->uri, $connection->options]);
